@@ -25,7 +25,7 @@ typedef struct hash_node hash_node;
 /**
  * 哈希表结构
  */
-struct hash_table {
+struct htable_st {
     hash_node **slots;                              /**< hash 槽数组 */
     unsigned int nslot;                             /**< nslot; */
     unsigned int load_factor;                       /**< 负载因子，nelement++ > nslot*load_factor  时进行hash */
@@ -37,7 +37,7 @@ struct hash_table {
 };
 
 /* 当前的hash表的大小 */
-unsigned int hash_element_count(hash_table *htable)
+unsigned int hash_element_count(htable_st *htable)
 {
     return htable->nelement;
 }
@@ -62,16 +62,16 @@ static int default_key_compare(void *key1, int klen1, void *key2, int klen2)
 }
 
 /* 创建哈希表 */
-hash_table *hash_create(hash_free_func_t hdel_func, hash_func_t hash_func)
+htable_st *hash_create(hash_free_func_t hdel_func, hash_func_t hash_func)
 {
     return hash_create2(hdel_func, hash_func, NULL, 0);
 }
 
 /* 创建哈希表-扩展 */
-hash_table *hash_create2(hash_free_func_t hdel_func, hash_func_t hash_func, 
+htable_st *hash_create2(hash_free_func_t hdel_func, hash_func_t hash_func, 
                            hash_key_compare_func_t hkey_compare_func, int flag)
 {
-    hash_table *htable = zalloc(sizeof(hash_table));
+    htable_st *htable = zalloc(sizeof(htable_st));
     htable->nslot = DEFAULT_HASH_SLOT_SIZE;
     htable->slots = zalloc(sizeof(hash_node *) * htable->nslot);
 
@@ -95,7 +95,7 @@ hash_table *hash_create2(hash_free_func_t hdel_func, hash_func_t hash_func,
 }
 
 /* 重新hash函数 */
-static void rehash(hash_table *htable)
+static void rehash(htable_st *htable)
 {
     if (htable->nslot == MAX_HASH_SLOT_SIZE)
         return;
@@ -133,7 +133,7 @@ static void rehash(hash_table *htable)
 }
 
 /* 哈希插入 */
-void hash_insert(hash_table *htable, void *key, int klen, void *value)
+void hash_insert(htable_st *htable, void *key, int klen, void *value)
 {
     unsigned int h = htable->hash_func(key, klen);
     unsigned int idx = h & (htable->nslot - 1);
@@ -166,7 +166,7 @@ void hash_insert(hash_table *htable, void *key, int klen, void *value)
 }
 
 /* 哈希删除 */
-void hash_delete(hash_table *htable, void *key, int klen)
+void hash_delete(htable_st *htable, void *key, int klen)
 {
     unsigned int h = htable->hash_func(key, klen);
     unsigned int idx = h & (htable->nslot - 1);
@@ -193,7 +193,7 @@ void hash_delete(hash_table *htable, void *key, int klen)
 }
 
 /* 哈希查找 */
-int hash_search(hash_table *htable, void *key, int klen, void **value)
+int hash_search(htable_st *htable, void *key, int klen, void **value)
 {
     unsigned int index = 0;
     while (index < htable->nslot) {
@@ -211,7 +211,7 @@ int hash_search(hash_table *htable, void *key, int klen, void **value)
 }
 
 /* 哈希遍历 */
-int hash_walk(hash_table *htable, hash_walk_func fn, void *user_data)
+int hash_walk(htable_st *htable, hash_walk_func fn, void *user_data)
 {
     int ret = 0;
     unsigned int index = 0;
@@ -234,7 +234,7 @@ int hash_walk(hash_table *htable, hash_walk_func fn, void *user_data)
 }
 
 /* 哈希销毁 */
-void hash_destroy(hash_table *htable)
+void hash_destroy(htable_st *htable)
 {
     unsigned int index = 0;
     while (index < htable->nslot) {
@@ -274,7 +274,7 @@ static void gen_rand_str(char * buff, int n)
     buff[n - 1] = '\0';
 }
 
-static void hash_slot_dump(hash_table *htable)
+static void hash_slot_dump(htable_st *htable)
 {
     unsigned int index = 0; 
     while (index < htable->nslot) {
@@ -291,7 +291,7 @@ static void hash_slot_dump(hash_table *htable)
 
 int main() 
 {
-    hash_table *htable = hash_create(data_free, NULL);
+    htable_st *htable = hash_create(data_free, NULL);
     
     for (unsigned int i = 0; i < 1000000; i++) {
         char *data = zalloc(64);

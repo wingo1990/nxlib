@@ -100,7 +100,7 @@ static int walk_callback(void *key, int klen, void *value, void *user_data)
 
 TEST(hash, opr)
 {
-    hash_table *htable = hash_create(data_free, NULL);
+    htable_st *htable = hash_create(data_free, NULL);
     #define COUNT 1000 
 	char *kvs[COUNT][2] = {0};
     for (int i = 0; i < COUNT; i++) {

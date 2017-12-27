@@ -14,8 +14,8 @@ extern "C" {
 /**
  * 哈希表结构
  */
-struct hash_table;
-typedef struct hash_table hash_table;
+struct htable_st;
+typedef struct htable_st htable_st;
 
 /**
  * 释放哈希表私有数据的函数类型
@@ -36,16 +36,16 @@ typedef unsigned int (*hash_func_t)(void *key, int klen);
  * \param htable
  * \return 哈希表目前的项目数量
  */
-unsigned int hash_element_count(hash_table *htable);
+unsigned int hash_element_count(htable_st *htable);
 
 /**
  * 创建一个哈希表
  * \param hdel_func 释放项目中私有数据的函数
  * \param hkey_func 自定义hash函数
  * \retval NULL 创建失败
- * \retval !NULL 创建成功，hash_table 结构
+ * \retval !NULL 创建成功，htable_st 结构
  */
-hash_table *hash_create(hash_free_func_t hdel_func, hash_func_t hash_func);
+htable_st *hash_create(hash_free_func_t hdel_func, hash_func_t hash_func);
    
 /**
  * key比较函数类型
@@ -64,9 +64,9 @@ typedef int (*hash_key_compare_func_t)(void *key1, int klen1, void *key2, int kl
  * \param hkey_compare_func 哈希key的比较函数
  * \param flag 标记位，可以扩展hash操作的一些行为
  * \retval NULL 创建失败
- * \retval !NULL 创建成功，hash_table 结构
+ * \retval !NULL 创建成功，htable_st 结构
  */
-hash_table *hash_create2(hash_free_func_t hdel_func, hash_func_t hash_func, 
+htable_st *hash_create2(hash_free_func_t hdel_func, hash_func_t hash_func, 
                            hash_key_compare_func_t hkey_compare_func, int flag);
    
 
@@ -77,7 +77,7 @@ hash_table *hash_create2(hash_free_func_t hdel_func, hash_func_t hash_func,
  * \param klen 键长度
  * \param vlaue 值
  */
-void hash_insert(hash_table *htable, void *key, int klen, void *vlaue);
+void hash_insert(htable_st *htable, void *key, int klen, void *vlaue);
 
 /**
  * 哈希表项删除操作
@@ -85,7 +85,7 @@ void hash_insert(hash_table *htable, void *key, int klen, void *vlaue);
  * \param key 
  * \param klen
  */
-void hash_delete(hash_table *htable, void *key, int klen);
+void hash_delete(htable_st *htable, void *key, int klen);
 
 /**
  * 哈希表查找操作
@@ -95,7 +95,7 @@ void hash_delete(hash_table *htable, void *key, int klen);
  * \param vlaue 值
  * \return 0表示成功， 非0表示查找失败
  */
-int hash_search(hash_table *htable, void *key, int klen, void **value);
+int hash_search(htable_st *htable, void *key, int klen, void **value);
 
 /**
  * 遍历函数函数类型，每个key-vlaue调用此函数
@@ -110,18 +110,18 @@ typedef int (*hash_walk_func)(void *key, int klen,
 
 /**
  * 哈希遍历函数
- * \param htable hash_table 结构
+ * \param htable htable_st 结构
  * \param fn hash_walk_func 函数
  * \param user_data 用户私有数据
  * \return 0表示成功，非0表示失败
  */
-int hash_walk(hash_table *htable, hash_walk_func fn, void *user_data);
+int hash_walk(htable_st *htable, hash_walk_func fn, void *user_data);
 
 /**
  * 销毁一个哈希表
  * \param htable 哈希表结构
  */
-void hash_destroy(hash_table *htable);
+void hash_destroy(htable_st *htable);
 
 
 #ifdef __cplusplus
