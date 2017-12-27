@@ -1,6 +1,6 @@
-#include "plist.h"
+#include <limits.h>
 
-#define INT_MAX  2147483647
+#include "plist.h"
 
 void plist_init(struct plist_head *head)
 {
