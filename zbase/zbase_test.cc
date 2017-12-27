@@ -1,7 +1,8 @@
-#include "zbase.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "gtest/gtest.h"
+
+#include "zbase.h"
 
 typedef struct {
     struct plist_head plist;
@@ -71,4 +72,70 @@ TEST(plist, opr)
     }
     
     printf("delete over...\n");
+}
+
+static void data_free(void *data)
+{
+    if(data)
+        free(data);
+}
+
+static void gen_rand_str(char * buff, int n)
+{
+    char metachar[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    srand(clock());
+    for (int i = 0; i < n - 1; i++)
+    {
+        buff[i] = metachar[rand() % 62]; 
+    }
+    buff[n - 1] = '\0';
+}
+
+static int walk_callback(void *key, int klen, void *value, void *user_data)
+{
+	int *count = (int *)user_data;
+	(*count)++;
+	return 0;
+}
+
+TEST(hash, opr)
+{
+    hash_table *htable = hash_create(data_free, NULL);
+    #define COUNT 1000 
+	char *kvs[COUNT][2] = {0};
+    for (int i = 0; i < COUNT; i++) {
+        char *data = (char *)malloc(64);
+        gen_rand_str(data, 64);
+        char *key = (char *)malloc(16);
+        gen_rand_str(key, 16);
+        hash_insert(htable, key, 16, data);
+		kvs[i][0] = key;
+		kvs[i][1] = data;
+		key = NULL;
+	}
+	
+	int walk_count = 0;
+	hash_walk(htable, walk_callback, &walk_count);
+	ASSERT_EQ(COUNT, walk_count);
+	
+	ASSERT_EQ(COUNT, hash_element_count(htable));
+
+	for (int i = 0; i < COUNT; i++) {
+		char *val = NULL;
+		ASSERT_EQ(0, hash_search(htable, kvs[i][0], 16, (void **)&val));
+		ASSERT_EQ(kvs[i][1], val);
+	}
+	
+	for (int i = 0; i < COUNT; i++) {
+		char *val = NULL;
+		hash_delete(htable, kvs[i][0], 16);
+		ASSERT_EQ(COUNT - (i+1), hash_element_count(htable));
+		ASSERT_NE(0, hash_search(htable, kvs[i][0], 16, (void **)&val));
+	}
+
+	hash_destroy(htable);
+	htable = NULL;
+	for (int i = 0; i < COUNT; i++) {
+		free(kvs[i][0]);
+	}
 }

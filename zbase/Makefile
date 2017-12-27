@@ -1,5 +1,5 @@
 NAME = zbase
-CFILES = plist.c 
+CFILES = plist.c hash.c
 CPPFILES = 
 TESTFILES = zbase_test.cc
 
@@ -28,8 +28,9 @@ $(TEST_TARGET): $(TARGET) $(TESTOBJECTS)
 test: $(TEST_TARGET) 
 	@echo "#!/bin/bash" > lib_test.sh
 	@echo "export LD_LIBRARY_PATH=./" >> lib_test.sh
-	@echo "./$(TEST_TARGET)" >> lib_test.sh
+	@echo "valgrind --leak-check=full --log-file=/tmp/valgrind.txt ./$(TEST_TARGET)" >> lib_test.sh
 	@sh lib_test.sh
+	@echo "please check /tmp/valgrind.txt.."
 	
 clean:
 	@rm -f $(OBJECTS) $(TESTOBJECTS) $(TARGET) $(TEST_TARGET) lib_test.sh 
